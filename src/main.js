@@ -41,3 +41,10 @@ startButton.addEventListener('click', () => {
 
     }, 2000);
 });
+
+let detector;
+
+async function initDetector() {
+    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+    console.log("Detector de poses listo")
+}
