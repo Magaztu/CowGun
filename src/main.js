@@ -50,14 +50,14 @@ async function initDetector() {
 }
 
 function calculateAngle(sh, el, wr){
-    const ab = {};
-    const cb = {};
+    const ab = {x: el.x - sh.x, y: el.y - sh.y};
+    const cb = {x: el.x - wr.x, y: el.y - wr.y};
 
-    const dot = {};
-    const magAB = Math.sqrt();
-    const magCB = Math.sqrt();
+    const dot = (ab.x * cb.x) + (ab.y * cb.y);
+    const magAB = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
+    const magCB = Math.sqrt(cb.x * cb.x + cb.y * cb.y);
 
-    const angledRad = Math.cos();
+    const angledRad = Math.cos( dot / (magAB * magCB));
     const angleDeg = angledRad * (180 / Math.PI);
     return angleDeg;
 }
