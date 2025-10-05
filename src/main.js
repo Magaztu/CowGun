@@ -48,3 +48,23 @@ async function initDetector() {
     detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
     console.log("Detector de poses listo")
 }
+
+async function detectPose() {
+    const poses = await detector.estimatePose(video);
+    if(poses.length > 0) {
+        const keypoints = poses[0].keypoints;
+
+        const shoulder = keypoints.find( kp => kp.name === 'right_shoulder');
+        const elbow = keypoints.find( kp => kp.name === 'right_elbow');
+        const wrist = keypoints.find( kp => kp.name === 'right_wrist');
+
+        if (shoulder && elbow && wrist) {
+            const angle = calculateAngle(shoulder, elbow, wrist);
+            console.log('Ángulo del brazo: ', angle);
+
+            // Implementar CalcAng
+        }
+    }
+
+    requestAnimationFrame(detectPose);
+}
