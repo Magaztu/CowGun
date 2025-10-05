@@ -49,6 +49,19 @@ async function initDetector() {
     console.log("Detector de poses listo")
 }
 
+function calculateAngle(sh, el, wr){
+    const ab = {};
+    const cb = {};
+
+    const dot = {};
+    const magAB = Math.sqrt();
+    const magCB = Math.sqrt();
+
+    const angledRad = Math.cos();
+    const angleDeg = angledRad * (180 / Math.PI);
+    return angleDeg;
+}
+
 async function detectPose() {
     const poses = await detector.estimatePose(video);
     if(poses.length > 0) {
