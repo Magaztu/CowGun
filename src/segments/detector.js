@@ -1,12 +1,3 @@
-//Move code to here so I don't cram main.js
-
-
-let detector;
-
-async function initDetector() {
-    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
-    console.log("Detector de poses listo")
-}
 
 function calculateAngle(sh, el, wr){
     const ab = {x: el.x - sh.x, y: el.y - sh.y};
@@ -21,7 +12,7 @@ function calculateAngle(sh, el, wr){
     return angleDeg;
 }
 
-async function detectPose() {
+export async function detectPose() {
     const poses = await detector.estimatePoses(video);
     if(poses.length > 0) {
         const keypoints = poses[0].keypoints;
