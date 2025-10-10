@@ -1,3 +1,9 @@
+let detector;
+
+export async function initDetector() {
+    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+    console.log("Detector de poses listo")
+}
 
 function calculateAngle(sh, el, wr){
     const ab = {x: el.x - sh.x, y: el.y - sh.y};
