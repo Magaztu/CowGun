@@ -1,7 +1,7 @@
 // wuuuu DOM manipulación wuuu
-import { initDetector } from "./segments/detector";
-import { detectPose } from "./segments/detector";
-import { playRandomCue } from "./segments/a-player";
+import { initDetector } from "./segments/detector.js";
+import { detectPose } from "./segments/detector.js";
+import { playRandomCue } from "./segments/a-player.js";
 
 
 const video = document.getElementById("video");
@@ -38,3 +38,7 @@ async function startGame() {
     await initDetector();
     detectPose();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    startGame();
+});
