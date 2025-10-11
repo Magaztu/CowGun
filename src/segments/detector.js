@@ -18,6 +18,15 @@ function calculateAngle(sh, el, wr){
     return angleDeg;
 }
 
+function getArmDirectionAngle(shoulder, wrist){
+    const dx = wrist.x - shoulder.x;
+    const dy = wrist.y - shoulder.y;
+
+    const angleRad = Math.atan2(dy,dx);
+    const angleDeg = angleRad * (180 / Math.PI);
+    return angleDeg; 
+}
+
 export async function detectPose() {
     const poses = await detector.estimatePoses(video);
     if(poses.length > 0) {
