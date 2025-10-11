@@ -42,9 +42,41 @@ export async function detectPose() {
 
         else{
             const angle = calculateAngle(shoulder, elbow, wrist);
-            console.log('Ángulo del brazo: ', angle);
+            const directionAngle = getArmDirectionAngle(shoulder, wrist);
+            console.log('Ángulo del codo: ', angle);
+            console.log('Angúlo de la dirección del brazo: ', directionAngle);
 
-            // Implementar CalcAng
+            const validElbow = angle >= 55 && angle <= 135;
+            const validDirection = directionAngle >= -45 && directionAngle <= 45;
+            // Pretty much placeholder angles frfrf
+
+            if (gameActive && !winnerDeclared){
+                if(validDirection && validElbow) {
+                    const gunPose = detectGunPose(); // More pleace holderisisrs
+                    if (gunPose){
+                        if(currentCue === "Fuego"){
+                            declareWinner();
+                        }
+                        else {
+                            falseAttemps++;
+                            message.textContent = "Te adelantaste...";
+                            if(falseAttemps >= 2){
+                                message.textContent = "¡IMIPACIENTE!";
+                                winnerDeclared = true;
+                            }
+                        }
+                    } 
+                    else {
+                        message.textContent = "¿A eso llamas pistola?";
+                    }
+                }
+                else {
+                    if (currentCue === "Fuego"){
+                        if (!validElbow){message.textContent = "¡Mala puntería!";}
+                        else if (!validDirection) {message.textContent = "¡A dónde apuntas!";}
+                    }
+                }
+            }
         }
     }
 
