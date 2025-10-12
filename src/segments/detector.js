@@ -1,4 +1,27 @@
 let detector;
+let messageElement;
+let videoElement;
+
+let gameActive = false;
+let currentCue = "";
+let winnerDeclared = false;
+let falseAttemps = 0;
+
+export function setGameLogic({messageEl, videoEl}){
+    messageElement = messageEl;
+    videoElement = videoEl;
+}
+
+export function setGameCue(word){
+    currentCue = word;
+    gameActive = true;
+    
+    setTimeout(() => {
+        gameActive = false;
+        currentCue = ""
+    }, 1500);
+}
+
 
 export async function initDetector() {
     detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
@@ -25,6 +48,16 @@ function getArmDirectionAngle(shoulder, wrist){
     const angleRad = Math.atan2(dy,dx);
     const angleDeg = angleRad * (180 / Math.PI);
     return angleDeg; 
+}
+
+function detectGunPose() {
+    return true; // Implementaré algo con Googlehand pipes luego
+}
+
+function declareWinner(){
+    winnerDeclared = true;
+    messageElement.textContent = "Ganador";
+    //Falta lógica de captura 
 }
 
 export async function detectPose() {
