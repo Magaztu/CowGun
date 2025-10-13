@@ -1,5 +1,5 @@
 // wuuuu DOM manipulación wuuu
-import { initDetector, detectPose, setGameCue, setGameLogic } from "./segments/detector.js";
+import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
 
@@ -34,6 +34,8 @@ function startCueLoop(){
         setGameCue(word);
 
     }, 3000);
+    
+    setCueIntervalId(cueIntervalId);
 }
 
 

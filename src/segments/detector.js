@@ -6,9 +6,17 @@ let gameActive = false;
 let currentCue = "";
 let winnerDeclared = false;
 // let falseAttempts = 0;
+let shootingWindowTimeOut = null;
 
 const playerLives = [2,2];
 let playerShotTimes = [null, null];
+
+let resetTimeoutId = null;
+let cueIntervalId = null;
+export function setCueIntervalId(id){
+    cueIntervalId = id;
+}
+
 
 export function setGameLogic({messageEl, videoEl}){
     messageElement = messageEl;
@@ -17,15 +25,25 @@ export function setGameLogic({messageEl, videoEl}){
 
 export function setGameCue(word){
     currentCue = word;
+
+    if (shootingWindowTimeOut) {
+        clearTimeout(shootingWindowTimeOut);
+        shootingWindowTimeOut = null;
+    }
+
+    gameActive = true;
+    playerShotTimes = [null, null];
+
     if(word === "Fuego"){
-        gameActive = true;
+        // Realmente no se debe hacer nada. Se espera a que alguien gane
     }
     else{
-        gameActive = true;
-        setTimeout(() => {
+        shootingWindowTimeOut = setTimeout(() => {
             gameActive = false;
-            currentCue = ""
-        }, 1500);
+            currentCue = "";
+            messageElement.textContent = "";
+            shootingWindowTimeOut = null;
+        }, 2000);
     }
 }
 
@@ -65,9 +83,22 @@ function detectGunPose() {
     return true; // Implementaré algo con Googlehand pipes luego
 }
 
-function declareWinner(){
+function declareWinner(winnerIndex){
     winnerDeclared = true;
-    messageElement.textContent = "Ganador";
+    gameActive = false;
+    messageElement.textContent = `¡Jugador ${winnerIndex + 1} gana!`;
+    console.log(`¡Jugador ${winnerIndex + 1} gana!`);
+
+    if (cueIntervalId) {
+        clearInterval(cueIntervalId);
+        cueIntervalId = null;
+    } //Parar el loop por si acaso otros clears no se han realizado.
+
+    if (shootingWindowTimeOut) {
+        clearTimeout(shootingWindowTimeOut);
+        shootingWindowTimeOut = null;
+    }
+    
     //Falta lógica de captura 
 }
 
@@ -94,6 +125,8 @@ export async function detectPose() {
 
     // ! P1 = IZQUIERDA
     // ? P2 = DERECHA
+
+    const PlayerStates = [null, null];
 
     poses.forEach((pose, index) => {
         pose.keypoints.forEach(kp => {
@@ -125,6 +158,7 @@ export async function detectPose() {
 
         if(!shoulder || !wrist || !elbow || shoulder.score < 0.3 || wrist.score < 0.3 || elbow.score < 0.3){
             console.warn("No se encontraron todos los keypoints. Omitiendo cálculo.")
+            PlayerStates[index] = null;
         }
     
         else{
@@ -132,59 +166,91 @@ export async function detectPose() {
             const directionAngle = getArmDirectionAngle(shoulder, wrist);
             console.log(`[Jugador ${index + 1}]\nÁngulo del codo: ${angle}\nDirección del brazo: ${directionAngle}`);
     
-            const validElbow = (angle >= 55 && angle <= 135);
-            const validDirection = (directionAngle >= -45 && directionAngle <= 45);
+            const validElbow = (angle >= 60 && angle <= 90);
+            const validDirection = (directionAngle >= 0 && directionAngle <= 180);
+            const gunPose = detectGunPose();
             // Pretty much placeholder angles frfrf
-    
-            if (gameActive && !winnerDeclared){
-                if(validDirection && validElbow) {
-                    const gunPose = detectGunPose(); // More pleace holderisisrs
-                    if (gunPose){
-                        if(currentCue === "Fuego"){
-                            if(!playerShotTimes[index]){
-                                playerShotTimes[index] = performance.now();
-                            }
 
-                            if(playerShotTimes[0] && playerShotTimes[1]){
-                                const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
-                                declareWinner(playerShotTimes[winnerIndex]);
-                            }
-                        }
-                        else {
-                            // falseAttempts++;
-                            playerLives[index]--;
-                            message.textContent = `Jugador ${index + 1} se adelantó... (${playerLives[index]} vidas restantes)`;
-                            
-                            if(playerLives[index] <= 0){
-                                winnerDeclared = true;
-                                message.textContent = `¡Jugador ${index + 1} descalificado por IMPACIENTE!`;
-                                if (cueIntervalId){
-                                    clearInterval(cueIntervalId);
-                                    cueIntervalId = null;
-                                }
-                            }
-                        }
-                    } 
-                    else {
-                        message.textContent = "¿A eso llamas pistola?";
-                    }
-                }
-                else {
-                    if (currentCue === "Fuego"){
-                        if (!validElbow){message.textContent = "¡Mala puntería!";}
-                        else if (!validDirection) {message.textContent = "¡A dónde apuntas!";}
-                    }
-                }
+            PlayerStates[index] ={
+                validElbow,
+                validDirection,
+                gunPose,
+                index
             }
         }
-        if (winnerDeclared) {
-            setTimeout(() => {
-                winnerDeclared = false;
-                falseAttempts = 0;
-                messageElement.textContent = "¿Otra ronda?";
-            }, 3000);
-        }
     });
+
+
+    if (gameActive && !winnerDeclared){
+        if(PlayerStates[0] && PlayerStates[1]) {
+            if(currentCue === "Fuego"){
+
+                const shooters = [];
+                PlayerStates.forEach((ps, i) => {
+                    if (ps.validElbow && ps.validDirection && ps.gunPose){
+                        if(!playerShotTimes[i]) playerShotTimes[i] = performance.now();
+                        shooters.push(i);
+                    }
+                });
+
+                if(shooters.length === 0) {
+                    messageElement.textContent = "Esperando disparo..."
+                }
+                else if(shooters.length === 1){
+                    declareWinner(shooters[0]);
+                }
+                else if(shooters.length === 2){
+                    const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
+                    declareWinner(winnerIndex);
+                }
+                
+                let errors = [];
+                PlayerStates.forEach((ps, i) => {
+                if (!ps.validElbow || !ps.validDirection){
+                    if (!ps.validElbow){
+                    errors.push(`¡Jugador ${i + 1} tiene mala puntería!`);
+                    }
+                    else if (!ps.validDirection) {
+                    errors.push(`Jugador ${i + 1} apunta mal!`);
+                    }
+                }
+                });
+                if (errors.length > 0) {
+                messageElement.innerHTML = errors.join("<br>");
+                }
+            }
+            else {
+                PlayerStates.forEach((ps, i) => {
+                    if (ps.validElbow && ps.validDirection && ps.gunPose) {
+                        playerLives[i]--;
+                        messageElement.textContent = `Jugador ${i + 1} se adelantó... (${playerLives[i]} vidas restantes)`;
+                        
+                        if(playerLives[i] === 0){
+                            winnerDeclared = true;
+                            messageElement.textContent = `¡Jugador ${i + 1} descalificado por IMPACIENTE!`;
+                            if (cueIntervalId){
+                                clearInterval(cueIntervalId);
+                                cueIntervalId = null;
+                            }
+                        }
+                    }
+                    
+                });
+            }
+        }
+    }
+
+    if (winnerDeclared && !resetTimeoutId) {
+        resetTimeoutId = setTimeout(() => {
+            winnerDeclared = false;
+            playerLives[0] = 2;
+            playerLives[1] = 2;
+            playerShotTimes[0] = null;
+            playerShotTimes[1] = null;
+            messageElement.textContent = "¿Otra ronda?";
+            resetTimeoutId = null;
+        }, 4000);
+    }
 
     requestAnimationFrame(detectPose);
 }
