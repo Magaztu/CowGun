@@ -1,10 +1,11 @@
 // wuuuu DOM manipulación wuuu
-import { initDetector } from "./segments/detector.js";
-import { detectPose } from "./segments/detector.js";
+import { initDetector, detectPose, setGameCue, setGameLogic } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
 
 const video = document.getElementById("video");
+const startButton = document.getElementById("startButton");
+const message = document.getElementById("message");
 
 async function startCamera() {
     try{
@@ -20,21 +21,20 @@ async function startCamera() {
     }
 }
 
-const startButton = document.getElementById("startButton");
-const message = document.getElementById("message");
 
 startButton.addEventListener('click', () => {
     message.textContent = "Preparado...";
     setTimeout(() => {
         const word = playRandomCue();
-        message.textContent = (`${word.toUpperCase()}`);
-        // Necesito más código luego
+        // message.textContent = (`${word.toUpperCase()}`);
+        setGameCue(word);
 
-    }, 2000);
+    }, 1000);
 });
 
 async function startGame() {
     await startCamera();
+    setGameLogic({messageEl: message, videoEl: video});
     await initDetector();
     detectPose();
 }

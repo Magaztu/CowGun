@@ -5,7 +5,7 @@ let videoElement;
 let gameActive = false;
 let currentCue = "";
 let winnerDeclared = false;
-let falseAttemps = 0;
+let falseAttempts = 0;
 
 export function setGameLogic({messageEl, videoEl}){
     messageElement = messageEl;
@@ -24,8 +24,12 @@ export function setGameCue(word){
 
 
 export async function initDetector() {
-    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
-    console.log("Detector de poses listo")
+    detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{
+        modelType: poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING,
+        enableSmoothing: true,
+        maxPoses: 2
+    });
+    console.log("Detector de poses listo (Multipose)")
 }
 
 function calculateAngle(sh, el, wr){
@@ -61,8 +65,28 @@ function declareWinner(){
 }
 
 export async function detectPose() {
-    const poses = await detector.estimatePoses(video);
-    if(poses.length !== 2){
+    const poses = await detector.estimatePoses(videoElement);
+    console.log(`Personas detectadas: ${poses.length}`);
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    poses.forEach(pose => {
+        pose.keypoints.forEach(kp => {
+            if (kp.score > 0.3) {
+                ctx.beginPath();
+                ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = "lime";
+                ctx.shadowColor = 'grey';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+            }
+        });
+    });
+
+    if(poses.length !== 2){ //Normalmente !== 2
         messageElement.textContent = "¡Se necesitan dos jugadores!"
     }
     else {
@@ -72,7 +96,7 @@ export async function detectPose() {
             const elbow = keypoints.find( kp => kp.name === 'right_elbow');
             const wrist = keypoints.find( kp => kp.name === 'right_wrist');
             
-            if(!shoulder || !wrist || !elbow || shoulder.score < 0.5 || wrist.score < 0.5 || elbow.score < 0.5){
+            if(!shoulder || !wrist || !elbow || shoulder.score < 0.3 || wrist.score < 0.3 || elbow.score < 0.3){
                 console.warn("No se encontraron todos los keypoints. Omitiendo cálculo.")
             }
     
@@ -94,10 +118,10 @@ export async function detectPose() {
                                 declareWinner();
                             }
                             else {
-                                falseAttemps++;
+                                falseAttempts++;
                                 message.textContent = "Te adelantaste...";
                                 if(falseAttemps >= 2){
-                                    message.textContent = "¡IMIPACIENTE!";
+                                    message.textContent = "¡IMPACIENTE!";
                                     winnerDeclared = true;
                                 }
                             }
@@ -117,6 +141,14 @@ export async function detectPose() {
         });
 
     }
+    if (winnerDeclared) {
+        setTimeout(() => {
+            winnerDeclared = false;
+            falseAttempts = 0;
+            messageElement.textContent = "¿Otra ronda?";
+        }, 3000);
+    }
+
 
     requestAnimationFrame(detectPose);
 }
