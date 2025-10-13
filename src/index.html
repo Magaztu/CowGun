@@ -3,26 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection/dist/movenet.min.js"></script>
 
     <title>CowGun</title>
 </head>
-<style>
-    #video{
-        transform: scaleX(-1) ;
-    }
-    #canvas{
-        transform: scaleX(-1) ;
-    }
-    .flash {
-    background-color: red;
-    transition: background-color 1s;
-    }
-</style>
 <body>
-    <h1>Préparate para el duelo [YIIIHAWW]</h1>
+    <!-- <h1>Préparate para el duelo [YIIIHAWW]</h1>
     
     <video id="video" width="1280" height="720" autoplay muted></video>
     <canvas id="canvas" width="1280" height="720"></canvas>
@@ -30,6 +19,23 @@
     <div>
         <button id="startButton">Comenzar</button>
         <p id="message">Esperando...</p>
+    </div> -->
+    <div id="introScreen" class="tv-on">
+        <video id="bgVideo" autoplay muted loop>
+            <source src="../video/cowboy.mp4"/>
+        </video>
+
+        <audio id="tvOnSfx" src="../audio/tvworld.mp3"></audio>
+        <audio id="bgMusic" src="../audio/western.mp3" loop></audio>
+
+        <div id="logoContainer">
+            <h1 id="logo">COWGUN</h1>
+            <button id="playButtom"> ¡JUGAR!</button>
+        </div>
+    </div>
+
+    <div id="gameScreen" style="display: none;">
+
     </div>
     
 </body>
