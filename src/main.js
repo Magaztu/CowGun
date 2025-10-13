@@ -29,6 +29,9 @@ startButton.addEventListener('click', () => {
         // message.textContent = (`${word.toUpperCase()}`);
         setGameCue(word);
 
+        document.body.classList.add("flash");
+        setTimeout(() => document.body.classList.remove("flash"), 150);
+
     }, 1000);
 });
 

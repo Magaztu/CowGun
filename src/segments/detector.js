@@ -84,9 +84,23 @@ export async function detectPose() {
                 ctx.fill();
             }
         });
+        const shoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder' && kp.score > 0.3);
+        const elbow    = pose.keypoints.find(kp => kp.name === 'right_elbow'    && kp.score > 0.3);
+        const wrist    = pose.keypoints.find(kp => kp.name === 'right_wrist'    && kp.score > 0.3);
+
+        if(shoulder && wrist && elbow){
+            ctx.beginPath();
+            ctx.moveTo(shoulder.x, shoulder.y);
+            ctx.lineTo(elbow.x, elbow.y);
+            ctx.lineTo(wrist.x, wrist.y);
+            ctx.strokeStyle = "cyan";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
     });
 
-    if(poses.length !== 2){ //Normalmente !== 2
+    if(poses.length <0){ //Normalmente !== 2
         messageElement.textContent = "¡Se necesitan dos jugadores!"
     }
     else {
