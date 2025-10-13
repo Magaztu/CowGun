@@ -21,9 +21,15 @@
         <p id="message">Esperando...</p>
     </div> -->
     <div id="logoContainer">
-        <h1 id="logo">COWGUN</h1>
+        <h1 id="logo" class="tv-on">COWGUN</h1>
         <button id="playButtom"> ¡JUGAR!</button>
     </div>
+    
+    <div id="waitingScreen" class="tv-on">
+        <p>Waiting for players...</p>
+        <p>Players detected: <span id="playerCount">0</span></p>
+    </div>
+
     <div id="introScreen" class="tv-on">
         <video id="bgVideo" autoplay muted loop>
             <source src="../video/cowboy.mp4"/>

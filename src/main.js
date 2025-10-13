@@ -63,6 +63,17 @@ async function startGame() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    
+    document.getElementById('introScreen').style.display = 'flex';
+    document.getElementById('introScreen').classList.remove('tv-on');
+    document.getElementById('introScreen').classList.add('tv-off');
+
+    document.getElementById('logoContainer').classList.remove('visible', 'logo-shrink');
+    document.getElementById('playButtom').classList.remove('visible', 'fade-out');
+
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('waitingScreen').style.display = 'none';
+
     setupIntroScreen(() => {
         //Presionar jugar
         startGame();

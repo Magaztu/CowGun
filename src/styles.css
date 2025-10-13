@@ -8,6 +8,44 @@ body, html {
     color: #FFD700;
 }
 
+#introScreen.tv-off #bgVideo {
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+#introScreen.tv-on #bgVideo {
+    opacity: 0.3;
+}
+
+#logoContainer, #playButtom {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+#logoContainer.visible, #playButtom.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#playButtom.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+#waitingScreen {
+    display: none;
+    color: #FFD700;
+    font-family: 'Courier New', Courier, monospace;
+    position: absolute;
+    top: 100px;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    z-index: 20;
+}
+
 #introScreen {
     position: relative;
     width: 100vw;
@@ -75,7 +113,7 @@ body, html {
     transition: background-color 0.3s ease;
 }
 
-#playButton:hover {
+#playButtom:hover {
     background: #FF4500;
     box-shadow: 0 0 20px #FF4500;
 }
