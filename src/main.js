@@ -22,6 +22,71 @@ async function startCamera() {
     }
 }
 
+const bgMusic = document.getElementById('bgMusic');
+const windAmbience = document.getElementById('windAmbience');
+
+function fadeOutMusic(audio, callback) {
+    let vol = audio.volume;
+    const fade = setInterval(() => {
+        if (vol > 0.05) {
+            vol -= 0.02;
+            audio.volume = vol;
+        } else {
+            clearInterval(fade);
+            audio.pause();
+            if (callback) callback();
+        }
+    }, 100);
+}
+
+function fadeInAudio(audio, targetVol = 0.3) {
+    audio.volume = 0;
+    audio.play();
+    let vol = 0;
+    const fade = setInterval(() => {
+        if (vol < targetVol) {
+            vol += 0.01;
+            audio.volume = vol;
+        } else {
+            clearInterval(fade);
+        }
+    }, 100);
+}
+
+const narratorAudios = [
+    document.getElementById('narrator3'),
+    document.getElementById('narrator2'),
+    document.getElementById('narrator1'),
+    document.getElementById('narratorGo')
+];
+
+function playNarratorCountdown(callback) {
+    let index = 0;
+
+    const playNext = () => {
+        if (index >= narratorAudios.length) {
+            if (callback) callback();
+            return;
+        }
+
+        const currentAudio = narratorAudios[index];
+        currentAudio.play().then(() => {
+            index++;
+
+            const delay = Math.random() * 1000 + 1000;
+            setTimeout(playNext, delay);
+        }).catch(err => {
+            console.error("Error playing narrator audio:", err);
+            index++;
+            playNext();
+        });
+    };
+
+    playNext();
+}
+
+
+
 let cueIntervalId = null;
 let playerCountdownStarted = false;
 let countdownTimeouts = [];
@@ -35,6 +100,7 @@ function startCueLoop(){
             cueIntervalId = null;
         }
         
+        message.textContent = word;
         setGameCue(word);
 
     }, 3000);
@@ -43,7 +109,7 @@ function startCueLoop(){
 }
 
 function showCountdownAndStart() {
-    const countdownSteps = ["5","4","3", "2", "1", "¡VAMOS!"];
+    const countdownSteps = ["5", "4", "3", "2", "1"];
     let step = 0;
 
     const showNext = () => {
@@ -52,13 +118,33 @@ function showCountdownAndStart() {
             const timeoutId = setTimeout(showNext, 1000);
             countdownTimeouts.push(timeoutId);
             step++;
-        } else {
-            startCueLoop();
+
+        } 
+        else {
+            
+            message.textContent = "¡Preparen sus armas!";
+            document.getElementById('player1Indicator').style.display = "block";
+            document.getElementById('player2Indicator').style.display = "block";
+
+            fadeOutMusic(bgMusic, () => {
+                fadeInAudio(windAmbience);
+
+                setTimeout(() => {
+                    playNarratorCountdown(() => {
+                        
+                        document.getElementById('player1Indicator').style.display = "none";
+                        document.getElementById('player2Indicator').style.display = "none";
+
+                        startCueLoop();
+                    });
+                }, 1000); 
+            });
         }
     };
 
     showNext();
 }
+
 
 
 

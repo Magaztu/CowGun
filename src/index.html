@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection/dist/movenet.min.js"></script>
-    
+
 </head>
 
 <body>
@@ -33,6 +33,12 @@
 
         <audio id="tvOnSfx" src="../audio/tvworld.mp3"></audio>
         <audio id="bgMusic" src="../audio/western.mp3" loop></audio>
+        <audio id="windAmbience" src="../audio/wwest.mp3" loop></audio>
+
+        <audio id="narrator3" src="../audio/narrator_3.m4a"></audio>
+        <audio id="narrator2" src="../audio/narrator_2.m4a"></audio>
+        <audio id="narrator1" src="../audio/narrator_1.m4a"></audio>
+        <audio id="narratorGo" src="../audio/bell.mp3"></audio>
         
     </div>
 
@@ -42,7 +48,8 @@
     </div>
     
     <div id="gameScreen" style="display: none;">
-
+        <div id="player1Indicator" class="player-indicator">Jugador 1<br>(Colócate aquí)</div>
+        <div id="player2Indicator" class="player-indicator">Jugador 2<br>(Colócate aquí)</div>
     </div>
 </body>
 <script type="module" src="./main.js"></script>

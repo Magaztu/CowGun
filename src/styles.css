@@ -190,6 +190,29 @@ body, html {
     z-index: 20;
 }
 
+.player-indicator {
+    position: absolute;
+    top: 20%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: gold;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
+    border: 2px solid gold;
+    border-radius: 10px;
+    z-index: 5;
+    text-align: center;
+    display: none;
+}
+
+#player1Indicator {
+    left: 5%;
+}
+
+#player2Indicator {
+    right: 5%;
+}
+
 .flash {
     background-color: red;
     transition: background-color 1s;
