@@ -1,6 +1,6 @@
 // wuuuu DOM manipulación wuuu
 import { setupIntroScreen } from "./segments/opening.js";
-import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId, setOnPlayerCountUpdate } from "./segments/detector.js";
+import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId, setOnPlayerCountUpdate, setGameRunning } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
 
@@ -24,6 +24,7 @@ async function startCamera() {
 
 const bgMusic = document.getElementById('bgMusic');
 const windAmbience = document.getElementById('windAmbience');
+windAmbience.volume = 0.3;
 
 function fadeOutMusic(audio, callback) {
     let vol = audio.volume;
@@ -145,9 +146,6 @@ function showCountdownAndStart() {
     showNext();
 }
 
-
-
-
 // startButton.addEventListener('click', () => {
 //     if (cueIntervalId) {
 //         clearInterval(cueIntervalId);
@@ -167,6 +165,7 @@ async function startGame() {
     await startCamera();
     setGameLogic({messageEl: message, videoEl: video});
     await initDetector();
+    setGameRunning(true);
     detectPose();
 
     setOnPlayerCountUpdate((playerCount) => {

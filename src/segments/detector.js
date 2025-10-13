@@ -1,3 +1,9 @@
+const gunshotAudio = new Audio('../../audio/revolve.mp3');
+gunshotAudio.volume = 0.5;
+
+const yihhawSfx = new Audio('../../audio/yiha.mp3');
+yihhawSfx.volume = 0.2;
+
 let detector;
 let messageElement;
 let videoElement;
@@ -10,6 +16,14 @@ let onPlayerCountUpdate = null;
 
 export function setOnPlayerCountUpdate(callback) {
     onPlayerCountUpdate = callback;
+}
+
+export const gameState = {
+  running: false,
+};
+
+export function setGameRunning(value) {
+    gameState.running = value;
 }
 
 function resizeCanvasToVideo(canvas, video) {
@@ -106,6 +120,15 @@ function declareWinner(winnerIndex){
     messageElement.textContent = `¡Jugador ${winnerIndex + 1} gana!`;
     console.log(`¡Jugador ${winnerIndex + 1} gana!`);
 
+    if (winnerIndex === 0){
+        document.getElementById('player1Indicator').style.display = "block";
+        document.getElementById('player1Indicator').textContent = "¡LA IZQUIERDA GANA!"
+    }
+    else{
+        document.getElementById('player2Indicator').style.display = "block";
+        document.getElementById('player2Indicator').textContent = "¡LA DERECHA GANA!"
+    }
+
     if (cueIntervalId) {
         clearInterval(cueIntervalId);
         cueIntervalId = null;
@@ -116,7 +139,40 @@ function declareWinner(winnerIndex){
         shootingWindowTimeOut = null;
     }
     
-    //Falta lógica de captura 
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    const ctx = canvas.getContext('2d');
+
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    videoElement.style.display = 'none';
+
+    const img = document.createElement('img');
+    img.id = 'winnerSnapshot';
+    img.style.position = 'absolute';
+    img.style.top = videoElement.offsetTop + 'px';
+    img.style.left = videoElement.offsetLeft + 'px';
+    img.style.width = videoElement.offsetWidth + 'px';
+    img.style.height = videoElement.offsetHeight + 'px';
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 2s ease-in-out';
+    img.src = canvas.toDataURL();
+
+    document.getElementById('gameVisuals').appendChild(img);
+
+    requestAnimationFrame(() => {
+        img.style.opacity = '1';
+    });
+
+    messageElement.style.fontSize = '5rem';
+    messageElement.style.fontWeight = 'bold';
+
+    setTimeout(() => {
+        img.style.opacity = '0';
+        document.getElementById('player1Indicator').style.display = "none";
+        document.getElementById('player2Indicator').style.display = "none";
+    }, 10000);
+
 }
 
 export async function detectPose() {
@@ -206,39 +262,44 @@ export async function detectPose() {
     if (gameActive && !winnerDeclared){
         if(PlayerStates[0] && PlayerStates[1]) {
             if(currentCue === "Fuego"){
-
-                const shooters = [];
-                PlayerStates.forEach((ps, i) => {
-                    if (ps.validElbow && ps.validDirection && ps.gunPose){
-                        if(!playerShotTimes[i]) playerShotTimes[i] = performance.now();
-                        shooters.push(i);
+                if(gameActive){
+                    const shooters = [];
+                    PlayerStates.forEach((ps, i) => {
+                        if (ps.validElbow && ps.validDirection && ps.gunPose){
+                            if(!playerShotTimes[i]) {
+                                playerShotTimes[i] = performance.now();
+                                gunshotAudio.play();
+                            }
+                            shooters.push(i);
+                        }
+                    });
+    
+                    if(shooters.length === 0) {
+                        messageElement.textContent = "Esperando disparo..."
                     }
-                });
-
-                if(shooters.length === 0) {
-                    messageElement.textContent = "Esperando disparo..."
-                }
-                else if(shooters.length === 1){
-                    declareWinner(shooters[0]);
-                }
-                else if(shooters.length === 2){
-                    const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
-                    declareWinner(winnerIndex);
-                }
-                
-                let errors = [];
-                PlayerStates.forEach((ps, i) => {
-                if (!ps.validElbow || !ps.validDirection){
-                    if (!ps.validElbow){
-                    errors.push(`¡Jugador ${i + 1} tiene mala puntería!`);
+                    else if(shooters.length === 1){
+                        declareWinner(shooters[0]);
                     }
-                    else if (!ps.validDirection) {
-                    errors.push(`Jugador ${i + 1} apunta mal!`);
+                    else if(shooters.length === 2){
+                        const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
+                        declareWinner(winnerIndex);
                     }
                 }
-                });
-                if (errors.length > 0) {
-                messageElement.innerHTML = errors.join("<br>");
+                else{
+                    let errors = [];
+                    PlayerStates.forEach((ps, i) => {
+                    if (!ps.validElbow || !ps.validDirection){
+                        if (!ps.validElbow){
+                        errors.push(`¡Jugador ${i + 1} tiene mala puntería!`);
+                        }
+                        else if (!ps.validDirection) {
+                        errors.push(`Jugador ${i + 1} apunta mal!`);
+                        }
+                    }
+                    });
+                    if (errors.length > 0) {
+                    messageElement.innerHTML = errors.join("<br>");
+                    }
                 }
             }
             else {
@@ -264,15 +325,43 @@ export async function detectPose() {
 
     if (winnerDeclared && !resetTimeoutId) {
         resetTimeoutId = setTimeout(() => {
-            winnerDeclared = false;
-            playerLives[0] = 2;
-            playerLives[1] = 2;
-            playerShotTimes[0] = null;
-            playerShotTimes[1] = null;
             messageElement.textContent = "¿Otra ronda?";
+
+            const playAgainContainer = document.getElementById('playAgainContainer');
+            playAgainContainer.style.display = 'block';
+            document.getElementById('playAgainButton').style.display = 'block';
+
             resetTimeoutId = null;
         }, 4000);
     }
 
-    requestAnimationFrame(detectPose);
+    if (gameState.running) {
+        requestAnimationFrame(detectPose);
+    }
 }
+
+document.getElementById('playAgainButton').addEventListener('click', () => {
+    yihhawSfx.play();
+
+    winnerDeclared = false;
+    playerLives[0] = 2;
+    playerLives[1] = 2;
+    playerShotTimes[0] = null;
+    playerShotTimes[1] = null;
+
+    messageElement.textContent = "Esperando jugadores...";
+    document.getElementById('playAgainContainer').style.display = 'none';
+    document.getElementById('playAgainButton').style.display = 'none';
+
+    videoElement.style.display = 'block';
+
+    const winnerSnapshot = document.getElementById('winnerSnapshot');
+    if (winnerSnapshot) {
+        winnerSnapshot.remove();
+    }
+
+    if (!resetTimeoutId) {
+        detectPose();
+    }
+
+});
