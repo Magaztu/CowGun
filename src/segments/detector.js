@@ -14,12 +14,16 @@ export function setGameLogic({messageEl, videoEl}){
 
 export function setGameCue(word){
     currentCue = word;
-    gameActive = true;
-    
-    setTimeout(() => {
-        gameActive = false;
-        currentCue = ""
-    }, 1500);
+    if(word === "Fuego"){
+        gameActive = true;
+    }
+    else{
+        gameActive = true;
+        setTimeout(() => {
+            gameActive = false;
+            currentCue = ""
+        }, 1500);
+    }
 }
 
 
@@ -73,7 +77,22 @@ export async function detectPose() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    poses.forEach(pose => {
+    if (poses.length !== 2) { // Normalmente !==2
+        messageElement.textContent = "¡Se necesitan dos jugadores!";
+        requestAnimationFrame(detectPose);
+        return;
+    }
+
+    poses.sort((a, b) => {
+        const ax = a.keypoints.reduce((sum,kp) => sum + kp.x, 0) / a.keypoints.length; // promedio de posición
+        const bx = b.keypoints.reduce((sum,kp) => sum + kp.x, 0) / b.keypoints.length;
+        return bx-ax;
+    })
+
+    // ! P1 = IZQUIERDA
+    // ? P2 = DERECHA
+
+    poses.forEach((pose, index) => {
         pose.keypoints.forEach(kp => {
             if (kp.score > 0.3) {
                 ctx.beginPath();
@@ -84,85 +103,76 @@ export async function detectPose() {
                 ctx.fill();
             }
         });
-        const shoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder' && kp.score > 0.3);
-        const elbow    = pose.keypoints.find(kp => kp.name === 'right_elbow'    && kp.score > 0.3);
-        const wrist    = pose.keypoints.find(kp => kp.name === 'right_wrist'    && kp.score > 0.3);
+
+        const isLeft = (index === 0);
+
+        const shoulder = pose.keypoints.find(kp => kp.name === ( isLeft ? 'left_shoulder' :'right_shoulder') && kp.score > 0.3);
+        const elbow = pose.keypoints.find(kp => kp.name === ( isLeft ? 'left_elbow' : 'right_elbow') && kp.score > 0.3);
+        const wrist = pose.keypoints.find(kp => kp.name === (isLeft ? 'left_wrist' : 'right_wrist') && kp.score > 0.3);
 
         if(shoulder && wrist && elbow){
             ctx.beginPath();
             ctx.moveTo(shoulder.x, shoulder.y);
             ctx.lineTo(elbow.x, elbow.y);
             ctx.lineTo(wrist.x, wrist.y);
-            ctx.strokeStyle = "cyan";
+            ctx.strokeStyle = isLeft ? "orange" : "cyan";
             ctx.lineWidth = 3;
             ctx.stroke();
         }
 
-    });
-
-    if(poses.length <0){ //Normalmente !== 2
-        messageElement.textContent = "¡Se necesitan dos jugadores!"
-    }
-    else {
-        poses.forEach(pose => {
-            const keypoints = pose.keypoints;
-            const shoulder = keypoints.find( kp => kp.name === 'right_shoulder');
-            const elbow = keypoints.find( kp => kp.name === 'right_elbow');
-            const wrist = keypoints.find( kp => kp.name === 'right_wrist');
-            
-            if(!shoulder || !wrist || !elbow || shoulder.score < 0.3 || wrist.score < 0.3 || elbow.score < 0.3){
-                console.warn("No se encontraron todos los keypoints. Omitiendo cálculo.")
-            }
+        if(!shoulder || !wrist || !elbow || shoulder.score < 0.3 || wrist.score < 0.3 || elbow.score < 0.3){
+            console.warn("No se encontraron todos los keypoints. Omitiendo cálculo.")
+        }
     
-            else{
-                const angle = calculateAngle(shoulder, elbow, wrist);
-                const directionAngle = getArmDirectionAngle(shoulder, wrist);
-                console.log('Ángulo del codo: ', angle);
-                console.log('Angúlo de la dirección del brazo: ', directionAngle);
+        else{
+            const angle = calculateAngle(shoulder, elbow, wrist);
+            const directionAngle = getArmDirectionAngle(shoulder, wrist);
+            console.log(`[Jugador ${index + 1}]\nÁngulo del codo: ${angle}\nDirección del brazo: ${directionAngle}`);
     
-                const validElbow = angle >= 55 && angle <= 135;
-                const validDirection = directionAngle >= -45 && directionAngle <= 45;
-                // Pretty much placeholder angles frfrf
+            const validElbow = (angle >= 55 && angle <= 135);
+            const validDirection = (directionAngle >= -45 && directionAngle <= 45);
+            // Pretty much placeholder angles frfrf
     
-                if (gameActive && !winnerDeclared){
-                    if(validDirection && validElbow) {
-                        const gunPose = detectGunPose(); // More pleace holderisisrs
-                        if (gunPose){
-                            if(currentCue === "Fuego"){
-                                declareWinner();
-                            }
-                            else {
-                                falseAttempts++;
-                                message.textContent = "Te adelantaste...";
-                                if(falseAttemps >= 2){
-                                    message.textContent = "¡IMPACIENTE!";
-                                    winnerDeclared = true;
+            if (gameActive && !winnerDeclared){
+                if(validDirection && validElbow) {
+                    const gunPose = detectGunPose(); // More pleace holderisisrs
+                    if (gunPose){
+                        if(currentCue === "Fuego"){
+                            declareWinner();
+                        }
+                        else {
+                            falseAttempts++;
+                            message.textContent = "Te adelantaste...";
+                            if(falseAttemps >= 2){
+                                message.textContent = "¡IMPACIENTE!";
+                                winnerDeclared = true;
+                                if (cueIntervalId){
+                                    clearInterval(cueIntervalId);
+                                    cueIntervalId = null;
                                 }
                             }
-                        } 
-                        else {
-                            message.textContent = "¿A eso llamas pistola?";
                         }
-                    }
+                    } 
                     else {
-                        if (currentCue === "Fuego"){
-                            if (!validElbow){message.textContent = "¡Mala puntería!";}
-                            else if (!validDirection) {message.textContent = "¡A dónde apuntas!";}
-                        }
+                        message.textContent = "¿A eso llamas pistola?";
+                    }
+                }
+                else {
+                    if (currentCue === "Fuego"){
+                        if (!validElbow){message.textContent = "¡Mala puntería!";}
+                        else if (!validDirection) {message.textContent = "¡A dónde apuntas!";}
                     }
                 }
             }
-        });
-
-    }
-    if (winnerDeclared) {
-        setTimeout(() => {
-            winnerDeclared = false;
-            falseAttempts = 0;
-            messageElement.textContent = "¿Otra ronda?";
-        }, 3000);
-    }
-
+        }
+        if (winnerDeclared) {
+            setTimeout(() => {
+                winnerDeclared = false;
+                falseAttempts = 0;
+                messageElement.textContent = "¿Otra ronda?";
+            }, 3000);
+        }
+    });
 
     requestAnimationFrame(detectPose);
 }

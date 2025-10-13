@@ -21,13 +21,30 @@ async function startCamera() {
     }
 }
 
+let cueIntervalId = null;
+function startCueLoop(){
+    cueIntervalId = setInterval( () => {
+        const word = playRandomCue();
+        
+        if(word == "Fuego"){
+            clearInterval(cueIntervalId);
+            cueIntervalId = null;
+        }
+        
+        setGameCue(word);
+
+    }, 3000);
+}
+
 
 startButton.addEventListener('click', () => {
+    if (cueIntervalId) {
+        clearInterval(cueIntervalId);
+        cueIntervalId = null;
+    }
     message.textContent = "Preparado...";
     setTimeout(() => {
-        const word = playRandomCue();
-        // message.textContent = (`${word.toUpperCase()}`);
-        setGameCue(word);
+        startCueLoop();
 
         document.body.classList.add("flash");
         setTimeout(() => document.body.classList.remove("flash"), 150);
