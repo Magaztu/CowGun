@@ -5,7 +5,10 @@ let videoElement;
 let gameActive = false;
 let currentCue = "";
 let winnerDeclared = false;
-let falseAttempts = 0;
+// let falseAttempts = 0;
+
+const playerLives = [2,2];
+let playerShotTimes = [null, null];
 
 export function setGameLogic({messageEl, videoEl}){
     messageElement = messageEl;
@@ -138,14 +141,23 @@ export async function detectPose() {
                     const gunPose = detectGunPose(); // More pleace holderisisrs
                     if (gunPose){
                         if(currentCue === "Fuego"){
-                            declareWinner();
+                            if(!playerShotTimes[index]){
+                                playerShotTimes[index] = performance.now();
+                            }
+
+                            if(playerShotTimes[0] && playerShotTimes[1]){
+                                const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
+                                declareWinner(playerShotTimes[winnerIndex]);
+                            }
                         }
                         else {
-                            falseAttempts++;
-                            message.textContent = "Te adelantaste...";
-                            if(falseAttemps >= 2){
-                                message.textContent = "¡IMPACIENTE!";
+                            // falseAttempts++;
+                            playerLives[index]--;
+                            message.textContent = `Jugador ${index + 1} se adelantó... (${playerLives[index]} vidas restantes)`;
+                            
+                            if(playerLives[index] <= 0){
                                 winnerDeclared = true;
+                                message.textContent = `¡Jugador ${index + 1} descalificado por IMPACIENTE!`;
                                 if (cueIntervalId){
                                     clearInterval(cueIntervalId);
                                     cueIntervalId = null;
