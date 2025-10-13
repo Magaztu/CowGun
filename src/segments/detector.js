@@ -5,7 +5,24 @@ let videoElement;
 let gameActive = false;
 let currentCue = "";
 let winnerDeclared = false;
-// let falseAttempts = 0;
+
+let onPlayerCountUpdate = null;
+
+export function setOnPlayerCountUpdate(callback) {
+    onPlayerCountUpdate = callback;
+}
+
+function resizeCanvasToVideo(canvas, video) {
+    const { videoWidth, videoHeight } = video;
+
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+
+    canvas.style.width = video.style.width;
+    canvas.style.height = video.style.height;
+}
+
+
 let shootingWindowTimeOut = null;
 
 const playerLives = [2,2];
@@ -106,9 +123,14 @@ export async function detectPose() {
     const poses = await detector.estimatePoses(videoElement);
     console.log(`Personas detectadas: ${poses.length}`);
 
+    if (onPlayerCountUpdate) {
+        onPlayerCountUpdate(poses.length);
+    }
+
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
+    resizeCanvasToVideo(canvas, videoElement);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (poses.length !== 2) { // Normalmente !==2

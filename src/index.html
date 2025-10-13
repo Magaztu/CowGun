@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CowGun</title>
+
+    <link rel="stylesheet" href="./styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection/dist/movenet.min.js"></script>
-
-    <title>CowGun</title>
+    
 </head>
+
 <body>
-    <!-- <h1>Préparate para el duelo [YIIIHAWW]</h1>
-    
-    <video id="video" width="1280" height="720" autoplay muted></video>
-    <canvas id="canvas" width="1280" height="720"></canvas>
-    
-    <div>
-        <button id="startButton">Comenzar</button>
-        <p id="message">Esperando...</p>
-    </div> -->
+
     <div id="logoContainer">
         <h1 id="logo" class="tv-on">COWGUN</h1>
-        <button id="playButtom"> ¡JUGAR!</button>
+        <button id="playButtom">¡JUGAR!</button>
     </div>
-    
+
     <div id="waitingScreen" class="tv-on">
-        <p>Waiting for players...</p>
-        <p>Players detected: <span id="playerCount">0</span></p>
+        <p>Esperando jugadores...</p>
+        <p>Jugadores detectados <span id="playerCount">0</span></p>
+
+        <p id="message" style="margin-top: 1rem; font-size: 1.5rem; color: #FFD700;"></p>
     </div>
 
     <div id="introScreen" class="tv-on">
         <video id="bgVideo" autoplay muted loop>
-            <source src="../video/cowboy.mp4"/>
+            <source src="../video/cowboy.mp4" />
         </video>
 
         <audio id="tvOnSfx" src="../audio/tvworld.mp3"></audio>
         <audio id="bgMusic" src="../audio/western.mp3" loop></audio>
-
+        
     </div>
 
+    <div id="gameVisuals" style="display: none;">
+        <video id="video" width="1280" height="720" autoplay muted></video>
+        <canvas id="canvas" width="1280" height="720"></canvas>
+    </div>
+    
     <div id="gameScreen" style="display: none;">
 
     </div>
-
 </body>
 <script type="module" src="./main.js"></script>
 </html>

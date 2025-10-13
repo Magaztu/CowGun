@@ -150,12 +150,46 @@ body, html {
     background-size: 100% 4px;
 }
 
+#video, #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
 #video{
-    transform: scaleX(-1) ;
+    opacity: 0.4;
+    z-index: 1;
 }
-#canvas{
-    transform: scaleX(-1) ;
+
+#canvas {
+    z-index: 2;
+    pointer-events: none;
 }
+
+#waitingScreen,
+#message {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#waitingScreen {
+    margin-top: 10vh;
+    font-size: 2rem;
+}
+
+#message {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    color: #FFD700;
+    z-index: 20;
+}
+
 .flash {
     background-color: red;
     transition: background-color 1s;

@@ -1,6 +1,6 @@
 // wuuuu DOM manipulación wuuu
 import { setupIntroScreen } from "./segments/opening.js";
-import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId } from "./segments/detector.js";
+import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId, setOnPlayerCountUpdate } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
 
@@ -23,6 +23,9 @@ async function startCamera() {
 }
 
 let cueIntervalId = null;
+let playerCountdownStarted = false;
+let countdownTimeouts = [];
+
 function startCueLoop(){
     cueIntervalId = setInterval( () => {
         const word = playRandomCue();
@@ -38,6 +41,25 @@ function startCueLoop(){
 
     setCueIntervalId(cueIntervalId);
 }
+
+function showCountdownAndStart() {
+    const countdownSteps = ["5","4","3", "2", "1", "¡VAMOS!"];
+    let step = 0;
+
+    const showNext = () => {
+        if (step < countdownSteps.length) {
+            message.textContent = countdownSteps[step];
+            const timeoutId = setTimeout(showNext, 1000);
+            countdownTimeouts.push(timeoutId);
+            step++;
+        } else {
+            startCueLoop();
+        }
+    };
+
+    showNext();
+}
+
 
 
 // startButton.addEventListener('click', () => {
@@ -60,10 +82,27 @@ async function startGame() {
     setGameLogic({messageEl: message, videoEl: video});
     await initDetector();
     detectPose();
+
+    setOnPlayerCountUpdate((playerCount) => {
+        document.getElementById('playerCount').textContent = playerCount;
+
+        if (playerCount === 2 && !playerCountdownStarted) {
+            playerCountdownStarted = true;
+            message.textContent = "Jugadores listos...";
+            setTimeout(showCountdownAndStart, 1000);
+        }
+        else if (playerCount < 2) {
+            // Si alguien abandona...
+            playerCountdownStarted = false;
+            message.textContent = "Esperando jugadores...";
+            countdownTimeouts.forEach(clearTimeout);
+            countdownTimeouts = [];
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     document.getElementById('introScreen').style.display = 'flex';
     document.getElementById('introScreen').classList.remove('tv-on');
     document.getElementById('introScreen').classList.add('tv-off');
@@ -77,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupIntroScreen(() => {
         //Presionar jugar
         startGame();
+        document.getElementById('gameVisuals').style.display = 'block';
         // Nito logica de players
     });
 });
