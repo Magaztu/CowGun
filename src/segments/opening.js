@@ -1,11 +1,11 @@
-import { set } from "express/lib/application";
-
 export function setupIntroScreen(onPlayCallback){
     const tvOnSfx = document.getElementById('tvOnSfx');
     const bgMusic = document.getElementById('bgMusic');
     const introScreen = document.getElementById('introScreen');
-    const playButton = document.getElementById('playButton');
+    const playButton = document.getElementById('playButtom');
     const gameScreen = document.getElementById('gameScreen');
+    const logoContainer = document.getElementById('logoContainer');
+
 
     tvOnSfx.play().catch( () => {
 
@@ -17,24 +17,29 @@ export function setupIntroScreen(onPlayCallback){
     });
 
     playButton.addEventListener('click', () =>{
-        const logo = document.getElementById('logo');
 
-        logo.style.transition = 'all 1s ease';
-        logo.style.fontSize = '2rem';
-        logo.style.position = 'fixed';
-        logo.style.top = '10px';
-        logo.style.left = '50%';
-        logo.style.transform = 'translateX(-50)';
+        logoContainer.classList.add('logo-shrink');
 
         let vol = 0.4;
         const fadeOut = setInterval(() =>{
             if (vol > 0.1) {
                 vol -= 0.02;
-                bgMusic.vol = vol;
+                bgMusic.volume = vol;
             }
             else {
                 clearInterval(fadeOut);
             }
         }, 100);
-    })
+
+        playButton.style.opacity = '0';
+        playButton.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            introScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            if(onPlayCallback) onPlayCallback();
+        }, 1100);
+
+    });
 }

@@ -1,10 +1,11 @@
 // wuuuu DOM manipulación wuuu
+import { setupIntroScreen } from "./segments/opening.js";
 import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
 
 const video = document.getElementById("video");
-const startButton = document.getElementById("startButton");
+// const startButton = document.getElementById("startButton");
 const message = document.getElementById("message");
 
 async function startCamera() {
@@ -34,25 +35,25 @@ function startCueLoop(){
         setGameCue(word);
 
     }, 3000);
-    
+
     setCueIntervalId(cueIntervalId);
 }
 
 
-startButton.addEventListener('click', () => {
-    if (cueIntervalId) {
-        clearInterval(cueIntervalId);
-        cueIntervalId = null;
-    }
-    message.textContent = "Preparado...";
-    setTimeout(() => {
-        startCueLoop();
+// startButton.addEventListener('click', () => {
+//     if (cueIntervalId) {
+//         clearInterval(cueIntervalId);
+//         cueIntervalId = null;
+//     }
+//     message.textContent = "Preparado...";
+//     setTimeout(() => {
+//         startCueLoop();
 
-        document.body.classList.add("flash");
-        setTimeout(() => document.body.classList.remove("flash"), 150);
+//         document.body.classList.add("flash");
+//         setTimeout(() => document.body.classList.remove("flash"), 150);
 
-    }, 1000);
-});
+//     }, 1000);
+// });
 
 async function startGame() {
     await startCamera();
@@ -62,5 +63,9 @@ async function startGame() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    startGame();
+    setupIntroScreen(() => {
+        //Presionar jugar
+        startGame();
+        // Nito logica de players
+    });
 });
