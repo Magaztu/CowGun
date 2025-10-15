@@ -20,10 +20,20 @@ export function setOnPlayerCountUpdate(callback) {
 
 export const gameState = {
   running: false,
+  allowCheck: false,
+  restart: null
 };
 
 export function setGameRunning(value) {
     gameState.running = value;
+}
+
+export function setGameCheck(value) {
+    gameState.allowCheck = value;
+}
+
+export function setGameRestart(value) {
+    gameState.restart = value;
 }
 
 function resizeCanvasToVideo(canvas, video) {
@@ -38,6 +48,7 @@ function resizeCanvasToVideo(canvas, video) {
 
 
 let shootingWindowTimeOut = null;
+let pausa = null;
 
 const playerLives = [2,2];
 let playerShotTimes = [null, null];
@@ -74,7 +85,7 @@ export function setGameCue(word){
             currentCue = "";
             messageElement.textContent = "";
             shootingWindowTimeOut = null;
-        }, 2000);
+        }, 2500);
     }
 }
 
@@ -155,7 +166,7 @@ function declareWinner(winnerIndex){
     img.style.width = videoElement.offsetWidth + 'px';
     img.style.height = videoElement.offsetHeight + 'px';
     img.style.opacity = '0';
-    img.style.transition = 'opacity 2s ease-in-out';
+    img.style.transition = 'opacity 5s ease-in-out';
     img.src = canvasSnap.toDataURL();
 
     document.getElementById('gameVisuals').appendChild(img);
@@ -164,13 +175,14 @@ function declareWinner(winnerIndex){
         img.style.opacity = '1';
     });
 
-    messageElement.style.fontSize = '5rem';
+    messageElement.style.fontSize = '3rem';
     messageElement.style.fontWeight = 'bold';
 
     setTimeout(() => {
         img.style.opacity = '0';
         document.getElementById('player1Indicator').style.display = "none";
         document.getElementById('player2Indicator').style.display = "none";
+
     }, 10000);
 
 }
@@ -305,7 +317,12 @@ export async function detectPose() {
             else {
                 PlayerStates.forEach((ps, i) => {
                     if (ps.validElbow && ps.validDirection && ps.gunPose) {
-                        playerLives[i]--;
+
+                        pausa = setTimeout(() => {
+                            playerLives[i]--;
+                        }, 200);
+                        pausa = null;
+
                         messageElement.textContent = `Jugador ${i + 1} se adelantó... (${playerLives[i]} vidas restantes)`;
                         
                         if(playerLives[i] === 0){
@@ -314,6 +331,8 @@ export async function detectPose() {
                             if (cueIntervalId){
                                 clearInterval(cueIntervalId);
                                 cueIntervalId = null;
+                                if(i === 0) declareWinner(i+1);
+                                if(i === 1) declareWinner(i-1);
                             }
                         }
                     }
@@ -325,6 +344,9 @@ export async function detectPose() {
 
     if (winnerDeclared && !resetTimeoutId) {
         resetTimeoutId = setTimeout(() => {
+            document.getElementById('info').style.display = 'block';
+            messageElement.style.fontSize = '1.5rem';
+            messageElement.style.fontWeight = 'none';
             messageElement.textContent = "¿Otra ronda?";
 
             const playAgainContainer = document.getElementById('playAgainContainer');
@@ -348,6 +370,7 @@ document.getElementById('playAgainButton').addEventListener('click', () => {
     currentCue = "";
     if (cueIntervalId) clearInterval(cueIntervalId);
     if (shootingWindowTimeOut) clearTimeout(shootingWindowTimeOut);
+    setGameCheck(true);
 
     playerLives[0] = 2;
     playerLives[1] = 2;
@@ -366,8 +389,13 @@ document.getElementById('playAgainButton').addEventListener('click', () => {
     }
 
     if (!resetTimeoutId) {
+        setGameCheck(true);
         setGameRunning(true);
         detectPose();
+        
+        if (typeof gameState.restart === "function") {
+            gameState.restart();
+        }
 
         document.getElementById('player2Indicator').innerHTML = "Jugador 2 <br> (Colócate aquí)";
         document.getElementById('player1Indicator').innerHTML = "Jugador 1 <br> (Colócate aquí)";

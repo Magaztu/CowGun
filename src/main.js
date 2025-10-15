@@ -1,8 +1,9 @@
 // wuuuu DOM manipulación wuuu
 import { setupIntroScreen } from "./segments/opening.js";
-import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId, setOnPlayerCountUpdate, setGameRunning } from "./segments/detector.js";
+import { initDetector, detectPose, setGameCue, setGameLogic, setCueIntervalId, setOnPlayerCountUpdate, setGameRunning, setGameRestart } from "./segments/detector.js";
 import { playRandomCue } from "./segments/a-player.js";
 
+let bloqueador = false;
 
 const video = document.getElementById("video");
 // const startButton = document.getElementById("startButton");
@@ -92,60 +93,65 @@ let cueIntervalId = null;
 let playerCountdownStarted = false;
 let countdownTimeouts = [];
 
-function startCueLoop(playerCount){
-    if (playerCount === 2){
-        cueIntervalId = setInterval( () => {
-            const word = playRandomCue();
-            
-            if(word == "Fuego"){
-                clearInterval(cueIntervalId);
-                cueIntervalId = null;
-            }
-            
-            message.textContent = word;
-            setGameCue(word);
+function startCueLoop(){
     
-        }, 3000);
-    
-        setCueIntervalId(cueIntervalId);
-    }
+    document.getElementById('info').style.display = 'none';
+    setGameCue("");
+    cueIntervalId = setInterval( () => {
+        const word = playRandomCue();
+        
+        if(word === "Fuego"){
+            clearInterval(cueIntervalId);
+            cueIntervalId = null;
+            // bloqueador = true;
+        }
+        
+        message.textContent = word;
+        setGameCue(word);
+
+    }, 3000);
+
+    setCueIntervalId(cueIntervalId);
 }
 
-function showCountdownAndStart(playerCount) {
+function showCountdownAndStart() {
     const countdownSteps = ["5", "4", "3", "2", "1"];
     let step = 0;
-
+    
     const showNext = () => {
         if (step < countdownSteps.length) {
             message.textContent = countdownSteps[step];
             const timeoutId = setTimeout(showNext, 1000);
-            countdownTimeouts.push(timeoutId);
-            step++;
+                countdownTimeouts.push(timeoutId);
+                step++;
+                
+            } 
+            else {
+                bloqueador = false
+                message.textContent = "¡Preparen sus armas!";
+                document.getElementById('player1Indicator').style.display = "block";
+                document.getElementById('player2Indicator').style.display = "block";
 
-        } 
-        else {
-            
-            message.textContent = "¡Preparen sus armas!";
-            document.getElementById('player1Indicator').style.display = "block";
-            document.getElementById('player2Indicator').style.display = "block";
+                fadeOutMusic(bgMusic, () => {
+                    fadeInAudio(windAmbience);
+                    
+                    setTimeout(() => {
+                        playNarratorCountdown(() => {
+                            
+                            document.getElementById('player1Indicator').style.display = "none";
+                            document.getElementById('player2Indicator').style.display = "none";
+                            
+                            startCueLoop();
+                        });
+                    }, 1000); 
+                });
+            }
+        };
+        
+    if(bloqueador == true){
 
-            fadeOutMusic(bgMusic, () => {
-                fadeInAudio(windAmbience);
-
-                setTimeout(() => {
-                    playNarratorCountdown(() => {
-                        
-                        document.getElementById('player1Indicator').style.display = "none";
-                        document.getElementById('player2Indicator').style.display = "none";
-
-                        startCueLoop(playerCount);
-                    });
-                }, 1000); 
-            });
-        }
-    };
-
-    showNext();
+        showNext();
+    }
 }
 
 // startButton.addEventListener('click', () => {
@@ -167,23 +173,30 @@ async function startGame() {
     await startCamera();
     setGameLogic({messageEl: message, videoEl: video});
     await initDetector();
+    if (cueIntervalId) clearInterval(cueIntervalId);
     setGameRunning(true);
+    bloqueador = true;
     detectPose();
 
     setOnPlayerCountUpdate((playerCount) => {
         document.getElementById('playerCount').textContent = playerCount;
 
-        if (playerCount === 2 && !playerCountdownStarted) {
-            playerCountdownStarted = true;
-            message.textContent = "Jugadores listos...";
-            setTimeout(showCountdownAndStart(playerCount), 1000);
-        }
-        else if (playerCount < 2) {
-            // Si alguien abandona...
-            playerCountdownStarted = false;
-            message.textContent = "Esperando jugadores...";
-            countdownTimeouts.forEach(clearTimeout);
-            countdownTimeouts = [];
+        if(bloqueador == true){
+
+            clearInterval(cueIntervalId);
+
+            if (playerCount === 2 && !playerCountdownStarted) {
+                playerCountdownStarted = true;
+                message.textContent = "Jugadores listos...";
+                setTimeout(showCountdownAndStart, 1000);
+            }
+            else if (playerCount < 2) {
+                // Si alguien abandona...
+                playerCountdownStarted = false;
+                message.textContent = "Esperando jugadores...";
+                countdownTimeouts.forEach(clearTimeout);
+                countdownTimeouts = [];
+            }
         }
     });
 }
@@ -202,8 +215,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupIntroScreen(() => {
         //Presionar jugar
+        // setGameCheck(true)
         startGame();
         document.getElementById('gameVisuals').style.display = 'block';
         // Nito logica de players
     });
 });
+
+setGameRestart(startGame);
