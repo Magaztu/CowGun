@@ -46,6 +46,29 @@ function resizeCanvasToVideo(canvas, video) {
     canvas.style.height = video.style.height;
 }
 
+const windAmbience = document.getElementById('windAmbience');
+const slipSfx = document.getElementById('slipSfx');
+const sadThrombone = document.getElementById('sad');
+const triumphJingle = document.getElementById('victory');
+
+function playSlipSound() {
+    slipSfx.currentTime = 0;
+    slipSfx.play();
+}
+
+function playVictorySound(type) {
+    
+    windAmbience.pause();
+    windAmbience.currentTime = 0;
+    windAmbience.loop = false;
+
+    if (type === 'lifeLoss') {
+        sadThrombone.play();
+    } else if (type === 'gunshot') {
+        triumphJingle.play();
+    }
+}
+
 
 let shootingWindowTimeOut = null;
 let pausa = null;
@@ -295,10 +318,12 @@ export async function detectPose() {
                         messageElement.textContent = "Esperando disparo..."
                     }
                     else if(shooters.length === 1){
+                        playVictorySound('gunshot');
                         declareWinner(shooters[0]);
                     }
                     else if(shooters.length === 2){
                         const winnerIndex = playerShotTimes[0] < playerShotTimes[1] ? 0 : 1;
+                        playVictorySound('gunshot');
                         declareWinner(winnerIndex);
                     }
                 }
@@ -325,6 +350,7 @@ export async function detectPose() {
 
                         pausa = setTimeout(() => {
                             playerLives[i]--;
+                            playSlipSound();
                         }, 100);
                         pausa = null;
 
@@ -336,6 +362,7 @@ export async function detectPose() {
                             if (cueIntervalId){
                                 clearInterval(cueIntervalId);
                                 cueIntervalId = null;
+                                playVictorySound('lifeLoss');
                                 if(i === 0) declareWinner(i+1);
                                 if(i === 1) declareWinner(i-1);
                             }
