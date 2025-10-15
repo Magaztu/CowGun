@@ -165,15 +165,20 @@ function declareWinner(winnerIndex){
     img.style.left = videoElement.offsetLeft + 'px';
     img.style.width = videoElement.offsetWidth + 'px';
     img.style.height = videoElement.offsetHeight + 'px';
-    img.style.opacity = '0';
-    img.style.transition = 'opacity 5s ease-in-out';
+    img.style.setProperty('opacity', '0', 'important');
+    img.style.setProperty('transition', 'opacity 5s ease-in-out', 'important');
     img.src = canvasSnap.toDataURL();
 
     document.getElementById('gameVisuals').appendChild(img);
 
-    requestAnimationFrame(() => {
-        img.style.opacity = '1';
-    });
+    // Couldn't get the transition to work
+    img.offsetWidth; 
+
+    img.style.opacity = '1';
+
+    // setTimeout(() => {
+    //     img.style.opacity = '1';
+    // }, 0);
 
     messageElement.style.fontSize = '3rem';
     messageElement.style.fontWeight = 'bold';
@@ -320,7 +325,7 @@ export async function detectPose() {
 
                         pausa = setTimeout(() => {
                             playerLives[i]--;
-                        }, 200);
+                        }, 100);
                         pausa = null;
 
                         messageElement.textContent = `Jugador ${i + 1} se adelantó... (${playerLives[i]} vidas restantes)`;
