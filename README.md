@@ -10,3 +10,7 @@ The ML model used is PoseModel from Tensorflow.js.
 The game will automatically tell if you're on the right or left side  of the screen, asigning a Player 1/2 tag accordingly.
 
 It also runs without any local dependencies. As long as internet connection is available, it will work.
+
+Maybe I'll add a single-player mode later, about shooting vile enemies or perhaps a infinite mode for practicing your (FUEGO!) cue reaction.
+
+This release is still a beta, so it needs tweaks.
