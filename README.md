@@ -18,3 +18,5 @@ This release is still a beta, so it needs tweaks.
 I've learned a lot with this project! Mostly how to use Tensorflow.js and applying actual mathematical logic into my code. Even if it's for recreational purposes.
 
 Also how to give a good presentation to the user (UX), drawing on a canvas, and a whole lot other stuff about JS like timeouts, time loops with setInterval(), DOM manipulation, etc.
+
+I will update this README.md with a more professional look later on.

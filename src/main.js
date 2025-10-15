@@ -92,24 +92,26 @@ let cueIntervalId = null;
 let playerCountdownStarted = false;
 let countdownTimeouts = [];
 
-function startCueLoop(){
-    cueIntervalId = setInterval( () => {
-        const word = playRandomCue();
-        
-        if(word == "Fuego"){
-            clearInterval(cueIntervalId);
-            cueIntervalId = null;
-        }
-        
-        message.textContent = word;
-        setGameCue(word);
-
-    }, 3000);
-
-    setCueIntervalId(cueIntervalId);
+function startCueLoop(playerCount){
+    if (playerCount === 2){
+        cueIntervalId = setInterval( () => {
+            const word = playRandomCue();
+            
+            if(word == "Fuego"){
+                clearInterval(cueIntervalId);
+                cueIntervalId = null;
+            }
+            
+            message.textContent = word;
+            setGameCue(word);
+    
+        }, 3000);
+    
+        setCueIntervalId(cueIntervalId);
+    }
 }
 
-function showCountdownAndStart() {
+function showCountdownAndStart(playerCount) {
     const countdownSteps = ["5", "4", "3", "2", "1"];
     let step = 0;
 
@@ -136,7 +138,7 @@ function showCountdownAndStart() {
                         document.getElementById('player1Indicator').style.display = "none";
                         document.getElementById('player2Indicator').style.display = "none";
 
-                        startCueLoop();
+                        startCueLoop(playerCount);
                     });
                 }, 1000); 
             });
@@ -174,7 +176,7 @@ async function startGame() {
         if (playerCount === 2 && !playerCountdownStarted) {
             playerCountdownStarted = true;
             message.textContent = "Jugadores listos...";
-            setTimeout(showCountdownAndStart, 1000);
+            setTimeout(showCountdownAndStart(playerCount), 1000);
         }
         else if (playerCount < 2) {
             // Si alguien abandona...

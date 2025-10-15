@@ -117,6 +117,8 @@ function detectGunPose() {
 function declareWinner(winnerIndex){
     winnerDeclared = true;
     gameActive = false;
+    setGameRunning(false);
+
     messageElement.textContent = `¡Jugador ${winnerIndex + 1} gana!`;
     console.log(`¡Jugador ${winnerIndex + 1} gana!`);
 
@@ -139,12 +141,10 @@ function declareWinner(winnerIndex){
         shootingWindowTimeOut = null;
     }
     
-    const canvas = document.createElement('canvas');
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    const ctx = canvas.getContext('2d');
+    const canvasSnap = document.getElementById('canvas');
+    const ctx = canvasSnap.getContext('2d');
 
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(videoElement, 0, 0, canvasSnap.width, canvasSnap.height);
     videoElement.style.display = 'none';
 
     const img = document.createElement('img');
@@ -156,7 +156,7 @@ function declareWinner(winnerIndex){
     img.style.height = videoElement.offsetHeight + 'px';
     img.style.opacity = '0';
     img.style.transition = 'opacity 2s ease-in-out';
-    img.src = canvas.toDataURL();
+    img.src = canvasSnap.toDataURL();
 
     document.getElementById('gameVisuals').appendChild(img);
 
@@ -344,6 +344,11 @@ document.getElementById('playAgainButton').addEventListener('click', () => {
     yihhawSfx.play();
 
     winnerDeclared = false;
+    gameActive = false;
+    currentCue = "";
+    if (cueIntervalId) clearInterval(cueIntervalId);
+    if (shootingWindowTimeOut) clearTimeout(shootingWindowTimeOut);
+
     playerLives[0] = 2;
     playerLives[1] = 2;
     playerShotTimes[0] = null;
@@ -361,7 +366,13 @@ document.getElementById('playAgainButton').addEventListener('click', () => {
     }
 
     if (!resetTimeoutId) {
+        setGameRunning(true);
         detectPose();
+
+        document.getElementById('player2Indicator').innerHTML = "Jugador 2 <br> (Colócate aquí)";
+        document.getElementById('player1Indicator').innerHTML = "Jugador 1 <br> (Colócate aquí)";
+
+        // Nito reiniciar el guego
     }
 
 });
