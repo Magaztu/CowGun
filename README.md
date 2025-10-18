@@ -20,3 +20,8 @@ I've learned a lot with this project! Mostly how to use Tensorflow.js and applyi
 Also how to give a good presentation to the user (UX), drawing on a canvas, and a whole lot other stuff about JS like timeouts, time loops with setInterval(), DOM manipulation, etc.
 
 I will update this README.md with a more professional look later on.
+
+# Gamemodes:
+This project features (or plans to) the following modes:
+- Single-player (PvE) mode: Win agains a horde of PNGs cowboys!
+- Two-Players (PvP) mode: Face each other in an epic 1v1 and see who shoots frist!
