@@ -25,3 +25,6 @@ I will update this README.md with a more professional look later on.
 This project features (or plans to) the following modes:
 - Single-player (PvE) mode: Win agains a horde of PNGs cowboys!
 - Two-Players (PvP) mode: Face each other in an epic 1v1 and see who shoots frist!
+
+# Deployment:
+A web deployment is on the way, it might be on github pages, cloudflare pages or vercel. Most likely the last one.
