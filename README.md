@@ -1,7 +1,5 @@
 # CowGun - ML and Video based minigame
 
-As of now:
-
 Web and ML based game about shooting as fast as you hear the "FUEGO!" audio cue.
 
 This minigame is based on 1, 2 Switch's "Fake Trigger" minigame.
@@ -25,6 +23,7 @@ I will update this README.md with a more professional look later on.
 This project features (or plans to) the following modes:
 - Single-player (PvE) mode: Win agains a horde of PNGs cowboys!
 - Two-Players (PvP) mode: Face each other in an epic 1v1 and see who shoots frist!
+- No Hat (No cap) mode: There will not be fake cues, prepare to showoff your ultimate reaction skills!
 
 # Deployment:
 A web deployment is on the way, it might be on github pages, cloudflare pages or vercel. Most likely the last one.
