@@ -25,5 +25,7 @@ This project features (or plans to) the following modes:
 - Two-Players (PvP) mode: Face each other in an epic 1v1 and see who shoots frist!
 - No Hat (No cap) mode: There will not be fake cues, prepare to showoff your ultimate reaction skills!
 
+- Online mode: I will add it when I figure it out.
+
 # Deployment:
 A web deployment is on the way, it might be on github pages, cloudflare pages or vercel. Most likely the last one.
