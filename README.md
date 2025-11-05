@@ -26,6 +26,7 @@ This project features (or plans to) the following modes:
 - No Hat (No cap) mode: There will not be fake cues, prepare to showoff your ultimate reaction skills!
 
 - Online mode: I will add it when I figure it out.
+- Infinite mode: Non-stop cues, let's see how that score grows!
 
 # Deployment:
 A web deployment is on the way, it might be on github pages, cloudflare pages or vercel. Most likely the last one.
